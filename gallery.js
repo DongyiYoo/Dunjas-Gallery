@@ -123,7 +123,7 @@ app.get('/signup', (req, res) => {
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
     
-    // password hashing
+    // hash the password before saving
     const hashedPassword = bcrypt.hashSync(password, 10);
     const stmt = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)");
 
