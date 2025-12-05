@@ -13,6 +13,7 @@
     <h2>Sign up</h2>
     <!-- signup form -->
     <form action="/signup" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="text" name="username" placeholder="New Username" required><br>
         <input type="password" name="password" placeholder="New Password" required><br><br>
         <button type="submit">Sign Up</button>
