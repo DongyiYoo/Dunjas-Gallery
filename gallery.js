@@ -58,7 +58,7 @@ app.use((req, res, next) => {
 
     // DB 
 db.serialize(() => {
-    db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS artworks (id INTEGER PRIMARY KEY, title TEXT, description TEXT, image_url TEXT)");
 
     db.get("SELECT count(*) as count FROM users WHERE username='admin'", (err, row) => {
@@ -140,13 +140,31 @@ app.get('/signup', (req, res) => {
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
     
-    // hash the password before saving
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    const stmt = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+    // data validation
+    db.get("SELECT username FROM users WHERE username = ?", [username], (err, row) => {
+        if (err) {
+            return res.render('login', { error: "System Error" });
+        }
 
-    stmt.run(username, hashedPassword, (err) => {
+        // error if username exsist
+        if (row) {
+            return res.send(`
+                <script>
+                    alert('Signup Failed: Username "${username}" already exists.');
+                    window.location.href = '/signup';
+                </script>
+            `);
+        }
+
+        // hash the password before saving
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        const stmt = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        
+        stmt.run(username, hashedPassword, (err) => {
         if (err) return res.render('login', { error: "Signup Failed" });
         res.render('login', { error: "Account is created successfully, Please login." });
+        });
+        stmt.finalize();
     });
 });
 
