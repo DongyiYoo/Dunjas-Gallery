@@ -45,9 +45,10 @@
     <hr>
 
     <h2>Gallery</h2>
-    <p>Choose a category:</p>
-    
+
+
     <!-- category navigation *DOM based XSS* -->
+    <p>Choose a category:</p>
     <div class="categories">
         <a href="#Oil_Painting">Oil Painting</a> |
         <a href="#Arcrylic_Painting">Arcrylic Painting</a> |
@@ -73,6 +74,7 @@
             <p>Description: <%- art.description %></p>
 
             <form action="/delete" method="POST" style="margin-top:10px;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">  <!-- add csrf token --> 
                 <input type="hidden" name="id" value="<%= art.id %>">
                 <button type="submit" class="delete-btn">Delete</button>
             </form>
@@ -84,6 +86,7 @@
     <!-- add new artworks -->
     <h3>Add an artwork</h3>
     <form action="/add" method="POST" style="background:#eee; padding:15px; border-radius:5px;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="text" name="title" placeholder="Art Title" required><br><br>
         <input type="text" name="image_url" placeholder="Image URL (http://...)" style="width:100%;"><br><br>
         <input type="text" name="description" placeholder="description" required><br><br>
@@ -97,12 +100,11 @@
     <script>
         
         function showCategory() {
-            // read untrusted data from the url hash directly
             if (window.location.hash) {
                 var category = decodeURIComponent(window.location.hash.substring(1));
 
-                // innerHTML executes without validation *DOM Based XSS*
-                document.getElementById("category").innerHTML = "Selected Category: " + category;
+                // defence DOM based XSS by using innerText
+                document.getElementById("category").innerText = "Selected Category: " + category;
             }
         }
 
@@ -110,5 +112,6 @@
         window.addEventListener('load', showCategory);
         window.addEventListener('hashchange', showCategory);
     </script>
+
 </body>
 </html>

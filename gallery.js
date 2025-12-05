@@ -12,7 +12,17 @@ const morgan = require('morgan');
 const app = express();
 const db = new sqlite3.Database('gallery.db');
 
-app.use(helmet());
+app.use(
+    helmet({
+    contentSecurityPolicy: {
+        directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:", "http:"], // allow external imgs
+        },
+    },
+})
+);
+
 app.use(morgan('combined'));
 
 // set ejs for view engine
