@@ -38,9 +38,12 @@
         <button type="submit">Search</button>
     </form>
     
-    <% if (search) { %>
-        <h3>Result: <%- search %></h3>
+<% if (search) { %>
+    <h3>Result: <%= search %></h3>
+    <% if (artworks.length === 0) { %>
+        <p>No artwork found for "<%= search %>".</p>
     <% } %>
+<% } %>
 
     <hr>
 
@@ -56,11 +59,6 @@
     </div>
 
     <div id="category" style="margin-top: 10px; color: black;"></div>
-
-    
-    <% if (artworks.length === 0) { %>
-        <p>No artwork is found.</p>
-    <% } %>
 
     <!-- display artworks -->
     <% artworks.forEach(function(art) { %>

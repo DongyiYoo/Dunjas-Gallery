@@ -14,12 +14,15 @@ const db = new sqlite3.Database('gallery.db');
 
 app.use(
     helmet({
-    contentSecurityPolicy: {
+        hsts: false,
+        contentSecurityPolicy: {
         directives: {
         defaultSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:", "http:"], // allow external imgs
+        scriptSrc: ["'self'", "'unsafe-inline'"], // allow alert
         },
     },
+    hsts: false,
 })
 );
 
@@ -86,9 +89,18 @@ app.get('/', (req, res) => {
     });
 });
 
-// add artwork
-
+// add artwork with access control
 app.post('/add', (req, res) => {
+    // only admin can add 
+    if (!req.session.user || req.session.user.username !== 'admin') {
+        // show alert
+        return res.send(`
+            <script>
+                alert('Access Denied: Only Admin can add artworks.');
+                window.location.href = '/';
+            </script>
+        `);
+    }
     const { title, description, image_url } = req.body;
 
 // prepared statement
@@ -100,13 +112,18 @@ app.post('/add', (req, res) => {
     stmt.finalize();
 });
 
-// delete 
+// delete
 // with access control
 app.post('/delete', (req, res) => {
 
     // only admin can delete
     if (!req.session.user || req.session.user.username !== 'admin') {
-        return res.status(403).send("Access Denied");
+        return res.send(`
+            <script>
+                alert('Access Denied: Only Admin can delete artworks.');
+                window.location.href = '/';
+            </script>
+        `);
     }
     const id = req.body.id;
     const stmt = db.prepare("DELETE FROM artworks WHERE id = ?");
