@@ -19,7 +19,7 @@ app.use(
         directives: {
         defaultSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:", "http:"], // allow external imgs
-        scriptSrc: ["'self'", "'unsafe-inline'"], // allow alert
+        scriptSrc: ["'self'", "'unsafe-inline'"], // allow scripts for alert
         },
     },
     hsts: false,
