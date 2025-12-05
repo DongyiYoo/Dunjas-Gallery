@@ -24,7 +24,7 @@
         Dunja Gallery
     </a>
 </h1>
-
+    <!-- show different message by the username -->
     <% if (user) { %>
         <p>Welcom to my Gallery, <b><%= user.username %></b>. (<a href="/logout">Logout</a>)</p>
     <% } else { %>
@@ -32,7 +32,7 @@
     <% } %>
 
     <hr>
-
+    <!-- search bar -->
     <form action="/" method="GET">
         <input type="text" name="search" placeholder="Search here..." value="<%- search || '' %>">
         <button type="submit">Search</button>
@@ -47,6 +47,7 @@
     <h2>Gallery</h2>
     <p>Choose a category:</p>
     
+    <!-- category navigation *DOM based XSS* -->
     <div class="categories">
         <a href="#Oil_Painting">Oil Painting</a> |
         <a href="#Arcrylic_Painting">Arcrylic Painting</a> |
@@ -60,6 +61,7 @@
         <p>No artwork is found.</p>
     <% } %>
 
+    <!-- display artworks -->
     <% artworks.forEach(function(art) { %>
         <div class="artwork">
             <h3><%= art.title %></h3>
@@ -79,6 +81,7 @@
 
     <hr>
 
+    <!-- add new artworks -->
     <h3>Add an artwork</h3>
     <form action="/add" method="POST" style="background:#eee; padding:15px; border-radius:5px;">
         <input type="text" name="title" placeholder="Art Title" required><br><br>
@@ -92,14 +95,18 @@
     <hr>
     
     <script>
+        
         function showCategory() {
+            // read untrusted data from the url hash directly
             if (window.location.hash) {
                 var category = decodeURIComponent(window.location.hash.substring(1));
 
+                // innerHTML executes without validation *DOM Based XSS*
                 document.getElementById("category").innerHTML = "Selected Category: " + category;
             }
         }
 
+        // page load and hash changes to trigger the function
         window.addEventListener('load', showCategory);
         window.addEventListener('hashchange', showCategory);
     </script>

@@ -7,23 +7,25 @@ const path = require('path');
 const app = express();
 const db = new sqlite3.Database('gallery.db');
 
-// ejs view engine, mildleware
+// set ejs for view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'front'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// settniing cookie, session for login
-// plain text secret key & no HttpOnly for the insecure ver
+// session setting
+// plain text secret key & no HttpOnly 
 app.use(session({ secret: '12345', resave: true, saveUninitialized: true
 
 }));
 
     // DB 
 db.serialize(() => {
+    // plaintext passwords -> sensitive data exposure
     db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)");
+     // no access control
     db.run("CREATE TABLE IF NOT EXISTS artworks (id INTEGER PRIMARY KEY, title TEXT, description TEXT, image_url TEXT)");
 
-    // passwords are not hashed -> sensitive data exposure
+
     db.get("SELECT count(*) as count FROM users WHERE username='admin'", (err, row) => {
         if (row && row.count == 0) {
             db.run("INSERT INTO users (username, password) VALUES ('admin', 'password123')");
@@ -36,8 +38,8 @@ app.get('/', (req, res) => {
 
     const search = req.query.search;
     let query = "SELECT * FROM artworks";
-
-    // search artworks
+    
+// user input saved without sanitizing
     if (search) {
         query += ` WHERE title LIKE '%${search}%' OR description LIKE '%${search}%'`;
     }
@@ -53,7 +55,7 @@ app.get('/', (req, res) => {
 
 app.post('/add', (req, res) => {
     const { title, description, image_url } = req.body;
-        // save all the info to the DB
+    // inputs are directly added to the DB -> sql injection
     const sql = `INSERT INTO artworks (title, description, image_url) VALUES ('${title}', '${description}', '${image_url}')`;
     db.run(sql, (err) => {
         res.redirect('/');
@@ -84,7 +86,6 @@ app.post('/signup', (req, res) => {
             // show the error
             return res.render('login', { error: "Sign up Error: " + err.message });
         }
-        // redirect to login page when success
         res.render('login', { error: "Account is created successfully, Please login." });
     });
 });
@@ -105,7 +106,7 @@ app.post('/login', (req, res) => {
             // show DB error directly
             res.render('login', { error: "DB Error: " + err.message });
         } else if (user) {
-            req.session.user = user; //save user in session
+            req.session.user = user; //no secure flag
             res.redirect('/');
         } else {
             res.render('login', { error: "Login Failed!" });
@@ -119,6 +120,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+// server 
 app.listen(6789, () => {
     console.log('Server is starting on http://localhost:6789');
 });
