@@ -65,6 +65,57 @@ app.post('/delete', (req, res) => {
     });
 });
 
+//register page
+app.get('/signup', (req, res) => {
+    res.render('signup');
+});
+
+app.post('/signup', (req, res) => {
+    const { username, password } = req.body;
+    
+    // save in plaintext password and without checking 
+    const sql = `INSERT INTO users (username, password) VALUES ('${username}', '${password}')`;
+    
+    db.run(sql, (err) => {
+        if (err) {
+            // show the error
+            return res.render('login', { error: "Sign up Error: " + err.message });
+        }
+        // redirect to login page when success
+        res.render('login', { error: "Account is created successfully, Please login." });
+    });
+});
+
+// login page
+app.get('/login', (req, res) => {
+    res.render('login', { error: null });
+});
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+// saving user input directly to the query
+    const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+
+    db.get(query, (err, user) => {
+        if (err) {
+            // show DB error directly
+            res.render('login', { error: "DB Error: " + err.message });
+        } else if (user) {
+            req.session.user = user; //save user in session
+            res.redirect('/');
+        } else {
+            res.render('login', { error: "Login Failed!" });
+        }
+    });
+});
+
+// logout
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
 app.listen(6789, () => {
     console.log('Server is starting on http://localhost:6789');
 });
