@@ -24,9 +24,12 @@ db.serialize(() => {
     db.run("CREATE TABLE IF NOT EXISTS artworks (id INTEGER PRIMARY KEY, title TEXT, description TEXT, image_url TEXT)");
 
     // passwords are not hashed -> sensitive data exposure
-    db.run("INSERT INTO users (username, password) VALUES ('admin', 'password123')");
-
+    db.get("SELECT count(*) as count FROM users WHERE username='admin'", (err, row) => {
+        if (row && row.count == 0) {
+            db.run("INSERT INTO users (username, password) VALUES ('admin', 'password123')");
+        }
     });
+});
 
 // index page
 app.get('/', (req, res) => {

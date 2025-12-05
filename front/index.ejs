@@ -25,7 +25,37 @@
     </a>
 </h1>
 
+    <% if (user) { %>
+        <p>Welcom to my Gallery, <b><%= user.username %></b>. (<a href="/logout">Logout</a>)</p>
+    <% } else { %>
+        <p><a href="/login">Login</a></p>
+    <% } %>
 
+    <hr>
+
+    <form action="/" method="GET">
+        <input type="text" name="search" placeholder="Search here..." value="<%- search || '' %>">
+        <button type="submit">Search</button>
+    </form>
+    
+    <% if (search) { %>
+        <h3>Result: <%- search %></h3>
+    <% } %>
+
+    <hr>
+
+    <h2>Gallery</h2>
+    <p>Choose a category:</p>
+    
+    <div class="categories">
+        <a href="#Oil_Painting">Oil Painting</a> |
+        <a href="#Arcrylic_Painting">Arcrylic Painting</a> |
+        <a href="#Gouche">Gouche</a>
+    </div>
+
+    <div id="category" style="margin-top: 10px; color: black;"></div>
+
+    
     <% if (artworks.length === 0) { %>
         <p>No artwork is found.</p>
     <% } %>
@@ -61,5 +91,17 @@
 
     <hr>
     
+    <script>
+        function showCategory() {
+            if (window.location.hash) {
+                var category = decodeURIComponent(window.location.hash.substring(1));
+
+                document.getElementById("category").innerHTML = "Selected Category: " + category;
+            }
+        }
+
+        window.addEventListener('load', showCategory);
+        window.addEventListener('hashchange', showCategory);
+    </script>
 </body>
 </html>
